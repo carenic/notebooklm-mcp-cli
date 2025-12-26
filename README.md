@@ -280,6 +280,51 @@ studio_delete(
 
 When cookies expire, you'll see an auth error. Just extract fresh cookies and call `save_auth_tokens()` again.
 
+## Troubleshooting
+
+### Chrome DevTools MCP Not Working (Cursor/Gemini CLI)
+
+If Chrome DevTools MCP shows "no tools, prompts or resources" or fails to start, it's likely due to a known `npx` bug with the puppeteer-core module.
+
+**Symptoms:**
+- Cursor/Gemini CLI shows MCP as connected but with "No tools, prompts, or resources"
+- Process spawn errors in logs: `spawn pnpx ENOENT` or module not found errors
+- Can't extract cookies for NotebookLM authentication
+
+**Fix:**
+
+1. **Install pnpm** (if not already installed):
+   ```bash
+   npm install -g pnpm
+   ```
+
+2. **Update Chrome DevTools MCP configuration:**
+
+   **For Cursor** (`~/.cursor/mcp.json`):
+   ```json
+   "chrome-devtools": {
+     "command": "pnpm",
+     "args": ["dlx", "chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222"]
+   }
+   ```
+
+   **For Gemini CLI** (`~/.gemini/settings.json`):
+   ```json
+   "chrome-devtools": {
+     "command": "pnpm",
+     "args": ["dlx", "chrome-devtools-mcp@latest"]
+   }
+   ```
+
+3. **Restart your IDE/CLI** for changes to take effect.
+
+**Why this happens:** Chrome DevTools MCP uses `puppeteer-core` which changed its module path in v23+, but `npx` caching behavior causes module resolution failures. Using `pnpm dlx` avoids this issue.
+
+**Related Issues:**
+- [ChromeDevTools/chrome-devtools-mcp#160](https://github.com/ChromeDevTools/chrome-devtools-mcp/issues/160)
+- [ChromeDevTools/chrome-devtools-mcp#111](https://github.com/ChromeDevTools/chrome-devtools-mcp/issues/111)
+- [ChromeDevTools/chrome-devtools-mcp#221](https://github.com/ChromeDevTools/chrome-devtools-mcp/issues/221)
+
 ## Limitations
 
 - **Rate limits**: Free tier has ~50 queries/day
