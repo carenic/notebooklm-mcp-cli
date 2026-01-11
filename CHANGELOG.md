@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed URL source retrieval by implementing correct metadata parsing in `get_notebook_sources_with_types`
 - Added fallback for finding source type name in `get_notebook_sources_with_types`
 
-## [0.1.6] - 2026-01-11
+## [0.1.6] - 2026-01-10
 
 ### Added
 - `studio_status` now includes mind maps alongside audio/video/slides
