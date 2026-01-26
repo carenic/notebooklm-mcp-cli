@@ -21,19 +21,6 @@ from pydantic import BaseModel, Field
 
 STORAGE_DIR_NAME = ".notebooklm-mcp-cli"
 
-# Old locations to check for migration
-OLD_LOCATIONS = [
-    Path.home() / ".notebooklm-mcp",  # Old MCP location
-    Path.home() / ".notebooklm-tools",  # Previous unified location
-]
-
-# Try to add old CLI location (platformdirs-based)
-try:
-    from platformdirs import user_data_dir
-    OLD_LOCATIONS.append(Path(user_data_dir("nlm")))
-except ImportError:
-    pass
-
 
 def get_storage_dir() -> Path:
     """Get the main storage directory (~/.notebooklm-mcp-cli/).
@@ -94,94 +81,135 @@ def get_auth_cache_file() -> Path:
 # Migration Support
 # =============================================================================
 
-def check_for_old_profiles() -> list[dict[str, Any]]:
-    """Check for existing profiles in old locations.
+# Old locations for Chrome profiles
+OLD_CHROME_PROFILES = [
+    Path.home() / ".notebooklm-mcp" / "chrome-profile",  # Old MCP
+    Path.home() / ".nlm" / "chrome-profile",  # Old CLI
+]
+
+# Old locations for aliases
+OLD_ALIAS_LOCATIONS = [
+    Path.home() / ".notebooklm-mcp" / "aliases.json",  # Old MCP (if any)
+]
+
+# Try to add old CLI alias location (platformdirs-based)
+try:
+    from platformdirs import user_config_dir
+    OLD_ALIAS_LOCATIONS.append(Path(user_config_dir("nlm")) / "aliases.json")
+except ImportError:
+    pass
+
+
+def check_migration_sources() -> dict[str, list[Path]]:
+    """Check for existing data that can be migrated.
     
-    Returns list of dicts with: location, profile_type, path, has_auth
+    Returns dict with:
+        - chrome_profiles: list of existing Chrome profile directories
+        - aliases: list of existing alias files
     """
-    found = []
+    result = {
+        "chrome_profiles": [],
+        "aliases": [],
+    }
     
-    for old_path in OLD_LOCATIONS:
-        if not old_path.exists():
-            continue
-            
-        # Check for MCP-style auth.json
-        auth_file = old_path / "auth.json"
-        if auth_file.exists():
-            found.append({
-                "location": str(old_path),
-                "profile_type": "mcp",
-                "path": old_path,
-                "auth_file": auth_file,
-                "has_chrome_profile": (old_path / "chrome-profile").exists(),
-            })
-        
-        # Check for CLI-style profiles/*/cookies.json
-        profiles_dir = old_path / "profiles"
-        if profiles_dir.exists():
-            for profile_dir in profiles_dir.iterdir():
-                if profile_dir.is_dir():
-                    cookies_file = profile_dir / "cookies.json"
-                    if cookies_file.exists():
-                        found.append({
-                            "location": str(old_path),
-                            "profile_type": "cli",
-                            "path": profile_dir,
-                            "profile_name": profile_dir.name,
-                            "cookies_file": cookies_file,
-                        })
+    for profile_path in OLD_CHROME_PROFILES:
+        if profile_path.exists() and profile_path.is_dir():
+            result["chrome_profiles"].append(profile_path)
     
-    return found
+    for alias_path in OLD_ALIAS_LOCATIONS:
+        if alias_path.exists() and alias_path.is_file():
+            result["aliases"].append(alias_path)
+    
+    return result
 
 
-def migrate_old_profiles(dry_run: bool = True) -> list[str]:
-    """Migrate profiles from old locations to new unified location.
+def migrate_aliases(source_path: Path, dry_run: bool = True) -> str | None:
+    """Migrate aliases from old location.
     
     Args:
-        dry_run: If True, only report what would be done.
+        source_path: Path to the old aliases.json file
+        dry_run: If True, only report what would be done
         
     Returns:
-        List of actions taken (or that would be taken).
+        Action description if migration was done, None if skipped
+    """
+    new_aliases = get_storage_dir() / "aliases.json"
+    
+    if new_aliases.exists():
+        return None  # Already have aliases, don't overwrite
+    
+    action = f"Copy aliases from {source_path}"
+    if not dry_run:
+        shutil.copy2(source_path, new_aliases)
+    
+    return action
+
+
+def migrate_chrome_profile(source_path: Path, dry_run: bool = True) -> str | None:
+    """Migrate Chrome profile from old location.
+    
+    Note: Chrome profile copy provides one-click login experience.
+    User will see account chooser but won't need to enter password.
+    
+    Args:
+        source_path: Path to the old chrome-profile directory
+        dry_run: If True, only report what would be done
+        
+    Returns:
+        Action description if migration was done, None if skipped
+    """
+    new_chrome = get_storage_dir() / "chrome-profile"
+    
+    if new_chrome.exists():
+        return None  # Already have a Chrome profile, don't overwrite
+    
+    action = f"Copy Chrome profile from {source_path}"
+    if not dry_run:
+        shutil.copytree(source_path, new_chrome)
+    
+    return action
+
+
+def run_migration(dry_run: bool = True, prefer_source: str | None = None) -> list[str]:
+    """Run migration from old locations.
+    
+    Args:
+        dry_run: If True, only report what would be done
+        prefer_source: If multiple Chrome profiles exist, prefer "cli" or "mcp"
+        
+    Returns:
+        List of actions taken (or that would be taken)
     """
     actions = []
-    new_storage = get_storage_dir()
+    sources = check_migration_sources()
     
-    for old_profile in check_for_old_profiles():
-        if old_profile["profile_type"] == "mcp":
-            # Migrate MCP auth.json
-            old_auth = old_profile["auth_file"]
-            new_auth = new_storage / "auth.json"
-            
-            if not new_auth.exists():
-                action = f"Copy auth.json from {old_profile['location']}"
+    # Migrate aliases (first one found wins)
+    for alias_path in sources["aliases"]:
+        action = migrate_aliases(alias_path, dry_run)
+        if action:
+            actions.append(action)
+            break  # Only migrate once
+    
+    # Migrate Chrome profile
+    if sources["chrome_profiles"]:
+        # If user has preference, try that first
+        if prefer_source == "cli":
+            # Prefer CLI location
+            sources["chrome_profiles"].sort(
+                key=lambda p: 0 if ".nlm" in str(p) else 1
+            )
+        elif prefer_source == "mcp":
+            # Prefer MCP location
+            sources["chrome_profiles"].sort(
+                key=lambda p: 0 if ".notebooklm-mcp" in str(p) else 1
+            )
+        
+        # Use the first available
+        for profile_path in sources["chrome_profiles"]:
+            action = migrate_chrome_profile(profile_path, dry_run)
+            if action:
                 actions.append(action)
-                if not dry_run:
-                    shutil.copy2(old_auth, new_auth)
-            
-            # Migrate Chrome profile
-            old_chrome = old_profile["path"] / "chrome-profile"
-            if old_chrome.exists():
-                new_chrome = new_storage / "chrome-profile"
-                if not new_chrome.exists():
-                    action = f"Copy Chrome profile from {old_profile['location']}"
-                    actions.append(action)
-                    if not dry_run:
-                        shutil.copytree(old_chrome, new_chrome)
-                        
-        elif old_profile["profile_type"] == "cli":
-            # Migrate CLI profile
-            profile_name = old_profile["profile_name"]
-            old_dir = old_profile["path"]
-            new_dir = get_profile_dir(profile_name)
-            
-            # Check if already migrated
-            if not (new_dir / "cookies.json").exists():
-                action = f"Copy CLI profile '{profile_name}' from {old_profile['location']}"
-                actions.append(action)
-                if not dry_run:
-                    for file in old_dir.iterdir():
-                        if file.is_file():
-                            shutil.copy2(file, new_dir / file.name)
+                break  # Only migrate once
     
     return actions
 
