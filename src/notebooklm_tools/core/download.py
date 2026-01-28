@@ -369,18 +369,30 @@ class DownloadMixin(BaseClient):
         else:
             target = candidates[0]
 
-        # Extract URL from metadata[5][0][0]
+        # Extract URL from target[14][2][0][1][0] (lh3.googleusercontent.com)
         try:
-            metadata = target[5]
-            if not isinstance(metadata, list) or len(metadata) == 0:
+            if len(target) <= 14 or target[14] is None:
                 raise ArtifactParseError("infographic", details="Invalid metadata structure")
 
-            media_list = metadata[0]
-            if not isinstance(media_list, list) or len(media_list) == 0:
-                raise ArtifactParseError("infographic", details="No media URLs found in metadata")
+            metadata = target[14]
+            if not isinstance(metadata, list) or len(metadata) < 3:
+                raise ArtifactParseError("infographic", details="No media data in metadata")
 
-            url = media_list[0][0] if isinstance(media_list[0], list) else None
-            if not url:
+            media_data = metadata[2]
+            if not isinstance(media_data, list) or len(media_data) == 0:
+                raise ArtifactParseError("infographic", details="No media items found")
+
+            # Navigate: media_data[0][1][0] to get URL
+            media_item = media_data[0]
+            if not isinstance(media_item, list) or len(media_item) < 2:
+                raise ArtifactParseError("infographic", details="Invalid media item structure")
+
+            url_data = media_item[1]
+            if not isinstance(url_data, list) or len(url_data) == 0:
+                raise ArtifactParseError("infographic", details="No URL data found")
+
+            url = url_data[0]
+            if not url or not isinstance(url, str):
                 raise ArtifactDownloadError("infographic", details="No download URL found")
 
             return await self._download_url(url, output_path, progress_callback)
@@ -426,17 +438,16 @@ class DownloadMixin(BaseClient):
         else:
             target = candidates[0]
 
-        # Extract PDF URL from metadata[12][0][1] (contribution.usercontent.google.com)
+        # Extract PDF URL from target[16][3] (contribution.usercontent.google.com)
         try:
-            metadata = target[12]
-            if not isinstance(metadata, list) or len(metadata) == 0:
+            if len(target) <= 16 or target[16] is None:
                 raise ArtifactParseError("slide_deck", details="Invalid metadata structure")
 
-            media_list = metadata[0]
-            if not isinstance(media_list, list) or len(media_list) < 2:
+            metadata = target[16]
+            if not isinstance(metadata, list) or len(metadata) < 4:
                 raise ArtifactParseError("slide_deck", details="No media URLs found in metadata")
 
-            pdf_url = media_list[1]
+            pdf_url = metadata[3]
             if not pdf_url or not isinstance(pdf_url, str):
                 raise ArtifactDownloadError("slide_deck", details="No download URL found")
 
