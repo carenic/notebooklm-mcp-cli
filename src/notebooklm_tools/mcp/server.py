@@ -428,6 +428,26 @@ def notebook_add_drive(
 
 
 @logged_tool()
+def notebook_add_file(
+    notebook_id: str,
+    file_path: str,
+) -> dict:
+    """Add a local file as source using resumable upload.
+
+    Supported file types: PDF, TXT, MD, DOCX, CSV, MP3, MP4, JPG, PNG
+
+    Args:
+        notebook_id: Notebook UUID
+        file_path: Absolute path to the local file
+
+    Returns:
+        dict with source 'id' and 'title'
+    """
+    client = get_client()
+    return client.add_file(notebook_id, file_path)
+
+
+@logged_tool()
 def notebook_query(
     notebook_id: str,
     query: str,
