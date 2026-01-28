@@ -157,28 +157,46 @@ class BrowserUploader:
                 f"Available buttons logged above."
             )
 
-        # Click "Add source" button
-        logger.info("Clicking 'Add source'...")
-        clicked = self._execute_script("""
+        # Check if upload dialog is already visible (empty notebook case)
+        # If not, click "Add source" button to open it
+        dialog_visible = self._execute_script("""
             (function() {
-                 // Look for button with aria-label="Add source"
-                 const buttons = Array.from(document.querySelectorAll('button'));
-                 const addBtn = buttons.find(b =>
-                     b.getAttribute('aria-label') === 'Add source' ||
-                     b.textContent.includes('Add sources')
-                 );
-                 if (addBtn) {
-                     addBtn.click();
-                     return true;
-                 }
-                 return false;
+                // Check if "Upload files" button is already visible
+                const buttons = Array.from(document.querySelectorAll('button'));
+                const uploadBtn = buttons.find(b => {
+                    const text = b.textContent;
+                    return text && text.toLowerCase().includes('upload') &&
+                           text.toLowerCase().includes('file') &&
+                           b.offsetParent !== null;
+                });
+                return !!uploadBtn;
             })()
         """)
 
-        if not clicked:
-            raise NLMError("Could not find 'Add source' button. Ensure notebook exists and you have access.")
+        if dialog_visible:
+            logger.info("Upload dialog already visible (empty notebook)")
+        else:
+            # Dialog not visible, need to click "Add source" button
+            logger.info("Clicking 'Add source' button...")
+            clicked = self._execute_script("""
+                (function() {
+                     const buttons = Array.from(document.querySelectorAll('button'));
+                     const addBtn = buttons.find(b =>
+                         b.getAttribute('aria-label') === 'Add source' ||
+                         b.textContent.includes('Add sources')
+                     );
+                     if (addBtn) {
+                         addBtn.click();
+                         return true;
+                     }
+                     return false;
+                })()
+            """)
 
-        time.sleep(2) # Wait for dialog to appear
+            if not clicked:
+                raise NLMError("Could not find 'Add source' button. Ensure notebook exists and you have access.")
+
+            time.sleep(2) # Wait for dialog to appear
 
         # Click "Upload files" button in the dialog
         logger.info("Clicking 'Upload files' button...")
