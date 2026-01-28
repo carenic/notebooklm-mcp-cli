@@ -157,24 +157,19 @@ class BrowserUploader:
                 f"Available buttons logged above."
             )
 
-        # Click Add Source
+        # Click "Add source" button
         logger.info("Clicking 'Add source'...")
         clicked = self._execute_script("""
             (function() {
-                 const btn = document.querySelector('.add-source-button') ||
-                             document.querySelector('.upload-button') ||
-                             document.querySelector('button[aria-label="Add sources"]');
-                 if (btn) {
-                     btn.click();
+                 // Look for button with aria-label="Add source"
+                 const buttons = Array.from(document.querySelectorAll('button'));
+                 const addBtn = buttons.find(b =>
+                     b.getAttribute('aria-label') === 'Add source' ||
+                     b.textContent.includes('Add sources')
+                 );
+                 if (addBtn) {
+                     addBtn.click();
                      return true;
-                 }
-                 // Fallback: search by text
-                 const elements = document.querySelectorAll('button, div[role=button]');
-                 for(const el of elements) {
-                     if(el.textContent.includes('Add source')) {
-                         el.click();
-                         return true;
-                     }
                  }
                  return false;
             })()
@@ -182,77 +177,101 @@ class BrowserUploader:
 
         if not clicked:
             raise NLMError("Could not find 'Add source' button. Ensure notebook exists and you have access.")
-            
-        time.sleep(1) # Wait for menu
-        
-        # Click PDF/File option in menu
-        logger.info("Clicking file upload option...")
+
+        time.sleep(2) # Wait for dialog to appear
+
+        # Click "Upload files" button in the dialog
+        logger.info("Clicking 'Upload files' button...")
         clicked_upload = self._execute_script("""
             (function() {
-                const options = document.querySelectorAll('button, [role=menuitem]');
-                for(const el of options) {
-                    if(el.textContent.includes('PDF') || el.textContent.includes('File') || el.textContent.includes('Upload')) {
-                        console.log('Clicking upload option:', el.textContent);
-                        el.click();
-                        return true;
-                    }
+                // The new UI shows a dialog with buttons: "Upload files", "Websites", "Drive", "Copied text"
+                // The button text is "uploadUpload files" (icon name + text)
+                const buttons = Array.from(document.querySelectorAll('button'));
+                const uploadBtn = buttons.find(b => {
+                    const text = b.textContent;
+                    // Match either "Upload files" or the full "uploadUpload files" text
+                    return text && (text.includes('Upload file') ||
+                           (text.toLowerCase().includes('upload') && text.toLowerCase().includes('file')));
+                });
+                if (uploadBtn) {
+                    console.log('Clicking Upload files button:', uploadBtn.textContent);
+                    uploadBtn.click();
+                    return true;
                 }
-                console.log('Upload option not found in menu');
+                console.log('Upload files button not found in dialog');
+                // Debug: log what buttons we found
+                console.log('Available buttons:', buttons.slice(0, 10).map(b => b.textContent.substring(0, 50)));
                 return false;
             })()
         """)
 
         if not clicked_upload:
-            logger.warning("Could not find PDF/File upload option in menu")
-
-        # Wait for input to be created
-        time.sleep(2)
-
-        # Find input element - try multiple approaches
-        logger.info("Looking for file input element...")
-
-        # First check if input exists
-        input_exists = self._execute_script("!!document.querySelector('input[type=file]')")
-        logger.info(f"File input exists: {input_exists}")
-
-        if not input_exists:
-            # Log all inputs for debugging
-            all_inputs = self._execute_script("""
-                Array.from(document.querySelectorAll('input'))
-                    .map(i => ({type: i.type, id: i.id, name: i.name, style: i.style.display}))
+            # Get debug info about what buttons were found
+            available_buttons = self._execute_script("""
+                Array.from(document.querySelectorAll('button'))
+                    .filter(b => b.offsetParent !== null)
+                    .map(b => b.textContent.substring(0, 50))
+                    .slice(0, 20)
             """)
-            logger.error(f"All inputs on page: {all_inputs}")
             raise NLMError(
-                "File input element not found after clicking upload options. "
-                "The NotebookLM UI may have changed."
+                f"Could not find 'Upload files' button in dialog. "
+                f"Available buttons: {available_buttons}"
             )
 
-        # Find input logic
-        try:
-            root = cdp.get_document_root(self.ws_url)
-            input_node_id = cdp.query_selector(self.ws_url, root["nodeId"], "input[type=file]")
+        # Modern NotebookLM UI doesn't create a file input element
+        # Instead, it triggers the OS file picker directly
+        # We use CDP's file chooser interception to handle this
 
-            if not input_node_id:
-                raise NLMError("File input element found in DOM but CDP query failed")
-                
-            # Set file
-            logger.info(f"Uploading {file_path.name}...")
-            cdp.execute_cdp_command(self.ws_url, "DOM.setFileInputFiles", {
-                "files": [str(file_path)],
-                "nodeId": input_node_id
+        logger.info(f"Uploading {file_path.name} using file chooser interception...")
+
+        try:
+            # Enable file chooser interception
+            # When enabled, file choosers will be intercepted and we can handle them programmatically
+            cdp.execute_cdp_command(self.ws_url, "Page.setFileChooserInterceptionEnabled", {
+                "enabled": True
             })
-            
-            # Trigger change event
-            self._execute_script("document.querySelector('input[type=file]').dispatchEvent(new Event('change', {bubbles: true}))")
-            
-            # Wait for upload to complete (dumb wait for now, ideal would be to watch for progress)
-            # NotebookLM shows a "Uploading..." toast. 
-            # We can return true immediately and let user check status, or wait.
-            # Let's wait a bit.
-            time.sleep(5) 
+
+            # Re-click the "Upload files" button now that interception is enabled
+            # This will trigger the file chooser, but CDP will intercept it
+            logger.info("Re-clicking 'Upload files' with interception enabled...")
+            self._execute_script("""
+                (function() {
+                    const buttons = Array.from(document.querySelectorAll('button'));
+                    const uploadBtn = buttons.find(b => {
+                        const text = b.textContent;
+                        return text && text.toLowerCase().includes('upload') && text.toLowerCase().includes('file');
+                    });
+                    if (uploadBtn) uploadBtn.click();
+                })()
+            """)
+
+            # Small delay to let the file chooser event be raised
+            time.sleep(0.5)
+
+            # Handle the file chooser with our file
+            cdp.execute_cdp_command(self.ws_url, "Page.handleFileChooser", {
+                "action": "accept",
+                "files": [str(file_path)]
+            })
+
+            # Disable interception
+            cdp.execute_cdp_command(self.ws_url, "Page.setFileChooserInterceptionEnabled", {
+                "enabled": False
+            })
+
+            # Wait for upload to complete
+            logger.info("File submitted, waiting for upload to complete...")
+            time.sleep(5)
             return True
-            
+
         except Exception as e:
+            # Make sure to disable interception even if there's an error
+            try:
+                cdp.execute_cdp_command(self.ws_url, "Page.setFileChooserInterceptionEnabled", {
+                    "enabled": False
+                })
+            except:
+                pass
             raise NLMError(f"Upload failed: {e}")
 
     def _execute_script(self, script: str) -> Any:
