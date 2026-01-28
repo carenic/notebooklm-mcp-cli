@@ -9,6 +9,7 @@ from notebooklm_tools import __version__
 from notebooklm_tools.cli.commands.auth import app as auth_app
 from notebooklm_tools.cli.commands.chat import app as chat_app
 from notebooklm_tools.cli.commands.notebook import app as notebook_app
+from notebooklm_tools.cli.commands.note import app as note_app
 from notebooklm_tools.cli.commands.research import app as research_app
 from notebooklm_tools.cli.commands.source import app as source_app
 from notebooklm_tools.cli.commands.alias import app as alias_app
@@ -60,6 +61,7 @@ app = typer.Typer(
 
 # Register noun-first subcommands (existing structure)
 app.add_typer(notebook_app, name="notebook", help="Manage notebooks")
+app.add_typer(note_app, name="note", help="Manage notes")
 app.add_typer(source_app, name="source", help="Manage sources")
 app.add_typer(chat_app, name="chat", help="Configure chat settings")
 app.add_typer(studio_app, name="studio", help="Manage studio artifacts")

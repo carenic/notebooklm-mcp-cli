@@ -52,7 +52,7 @@ class NotesMixin(BaseClient):
             if note_id:
                 # Now update with content if provided
                 if content:
-                    update_result = self.update_note(note_id, content=content, title=title)
+                    update_result = self.update_note(note_id, content=content, title=title, notebook_id=notebook_id)
                     if update_result:
                         return {
                             "id": note_id,
