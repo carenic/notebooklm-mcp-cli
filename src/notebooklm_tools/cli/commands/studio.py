@@ -372,6 +372,7 @@ def create_mindmap(
             with get_client(profile) as client:
                 # Two-step process: generate then save
                 gen_result = client.generate_mind_map(
+                    notebook_id=notebook_id,
                     source_ids=parsed_source_ids,
                 )
 

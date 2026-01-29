@@ -10,7 +10,7 @@ from .utils import parse_timestamp
 
 class StudioMixin(BaseClient):
     """Mixin providing studio content creation and status operations.
-    
+
     This mixin handles all studio artifact operations:
     - Audio overview creation (podcasts)
     - Video overview creation
@@ -24,13 +24,35 @@ class StudioMixin(BaseClient):
     """
 
     # =========================================================================
+    # Helper Methods
+    # =========================================================================
+
+    def _get_all_source_ids(self, notebook_id: str) -> list[str]:
+        """Get all source IDs from a notebook.
+
+        Uses get_notebook_sources_with_types() for structured, reliable access.
+
+        Args:
+            notebook_id: The notebook UUID
+
+        Returns:
+            List of source UUIDs, or empty list if none found
+        """
+        try:
+            sources = self.get_notebook_sources_with_types(notebook_id)
+            return [s["id"] for s in sources if s.get("id")]
+        except Exception:
+            # Return empty list on error - caller methods will handle gracefully
+            return []
+
+    # =========================================================================
     # Studio Operations
     # =========================================================================
 
     def create_audio_overview(
         self,
         notebook_id: str,
-        source_ids: list[str],
+        source_ids: list[str] | None = None,
         format_code: int = 1,  # AUDIO_FORMAT_DEEP_DIVE
         length_code: int = 2,  # AUDIO_LENGTH_DEFAULT
         language: str = "en",
@@ -38,6 +60,13 @@ class StudioMixin(BaseClient):
     ) -> dict | None:
         """Create an Audio Overview (podcast) for a notebook."""
         client = self._get_client()
+
+        # Default to all sources if not specified
+        if source_ids is None:
+            source_ids = self._get_all_source_ids(notebook_id)
+
+        if not source_ids:
+            raise ValueError(f"No sources found in notebook {notebook_id}. Add sources before creating studio content.")
 
         # Build source IDs in the nested format: [[[id1]], [[id2]], ...]
         sources_nested = [[[sid]] for sid in source_ids]
@@ -99,7 +128,7 @@ class StudioMixin(BaseClient):
     def create_video_overview(
         self,
         notebook_id: str,
-        source_ids: list[str],
+        source_ids: list[str] | None = None,
         format_code: int = 1,  # VIDEO_FORMAT_EXPLAINER
         visual_style_code: int = 1,  # VIDEO_STYLE_AUTO_SELECT
         language: str = "en",
@@ -107,6 +136,13 @@ class StudioMixin(BaseClient):
     ) -> dict | None:
         """Create a Video Overview for a notebook."""
         client = self._get_client()
+
+        # Default to all sources if not specified
+        if source_ids is None:
+            source_ids = self._get_all_source_ids(notebook_id)
+
+        if not source_ids:
+            raise ValueError(f"No sources found in notebook {notebook_id}. Add sources before creating studio content.")
 
         # Build source IDs in the nested format: [[[id1]], [[id2]], ...]
         sources_nested = [[[sid]] for sid in source_ids]
@@ -380,7 +416,7 @@ class StudioMixin(BaseClient):
     def create_infographic(
         self,
         notebook_id: str,
-        source_ids: list[str],
+        source_ids: list[str] | None = None,
         orientation_code: int = 1,  # INFOGRAPHIC_ORIENTATION_LANDSCAPE
         detail_level_code: int = 2,  # INFOGRAPHIC_DETAIL_STANDARD
         language: str = "en",
@@ -388,6 +424,13 @@ class StudioMixin(BaseClient):
     ) -> dict | None:
         """Create an Infographic from notebook sources."""
         client = self._get_client()
+
+        # Default to all sources if not specified
+        if source_ids is None:
+            source_ids = self._get_all_source_ids(notebook_id)
+
+        if not source_ids:
+            raise ValueError(f"No sources found in notebook {notebook_id}. Add sources before creating studio content.")
 
         # Build source IDs in the nested format: [[[id1]], [[id2]], ...]
         sources_nested = [[[sid]] for sid in source_ids]
@@ -439,7 +482,7 @@ class StudioMixin(BaseClient):
     def create_slide_deck(
         self,
         notebook_id: str,
-        source_ids: list[str],
+        source_ids: list[str] | None = None,
         format_code: int = 1,  # SLIDE_DECK_FORMAT_DETAILED
         length_code: int = 3,  # SLIDE_DECK_LENGTH_DEFAULT
         language: str = "en",
@@ -447,6 +490,13 @@ class StudioMixin(BaseClient):
     ) -> dict | None:
         """Create a Slide Deck from notebook sources."""
         client = self._get_client()
+
+        # Default to all sources if not specified
+        if source_ids is None:
+            source_ids = self._get_all_source_ids(notebook_id)
+
+        if not source_ids:
+            raise ValueError(f"No sources found in notebook {notebook_id}. Add sources before creating studio content.")
 
         # Build source IDs in the nested format: [[[id1]], [[id2]], ...]
         sources_nested = [[[sid]] for sid in source_ids]
@@ -497,13 +547,20 @@ class StudioMixin(BaseClient):
     def create_report(
         self,
         notebook_id: str,
-        source_ids: list[str],
+        source_ids: list[str] | None = None,
         report_format: str = "Briefing Doc",
         custom_prompt: str = "",
         language: str = "en",
     ) -> dict | None:
         """Create a Report from notebook sources."""
         client = self._get_client()
+
+        # Default to all sources if not specified
+        if source_ids is None:
+            source_ids = self._get_all_source_ids(notebook_id)
+
+        if not source_ids:
+            raise ValueError(f"No sources found in notebook {notebook_id}. Add sources before creating studio content.")
 
         # Build source IDs in the nested format: [[[id1]], [[id2]], ...]
         sources_nested = [[[sid]] for sid in source_ids]
@@ -613,11 +670,18 @@ class StudioMixin(BaseClient):
     def create_flashcards(
         self,
         notebook_id: str,
-        source_ids: list[str],
+        source_ids: list[str] | None = None,
         difficulty_code: int = 2,  # FLASHCARD_DIFFICULTY_MEDIUM
     ) -> dict | None:
         """Create Flashcards from notebook sources."""
         client = self._get_client()
+
+        # Default to all sources if not specified
+        if source_ids is None:
+            source_ids = self._get_all_source_ids(notebook_id)
+
+        if not source_ids:
+            raise ValueError(f"No sources found in notebook {notebook_id}. Add sources before creating studio content.")
 
         # Build source IDs in the nested format: [[[id1]], [[id2]], ...]
         sources_nested = [[[sid]] for sid in source_ids]
@@ -676,7 +740,7 @@ class StudioMixin(BaseClient):
     def create_quiz(
         self,
         notebook_id: str,
-        source_ids: list[str],
+        source_ids: list[str] | None = None,
         question_count: int = 2,
         difficulty: int = 2,
     ) -> dict | None:
@@ -684,11 +748,19 @@ class StudioMixin(BaseClient):
 
         Args:
             notebook_id: Notebook UUID
-            source_ids: List of source UUIDs
+            source_ids: List of source UUIDs (defaults to all sources)
             question_count: Number of questions (default: 2)
             difficulty: Difficulty level (default: 2)
         """
         client = self._get_client()
+
+        # Default to all sources if not specified
+        if source_ids is None:
+            source_ids = self._get_all_source_ids(notebook_id)
+
+        if not source_ids:
+            raise ValueError(f"No sources found in notebook {notebook_id}. Add sources before creating studio content.")
+
         sources_nested = [[[sid]] for sid in source_ids]
 
         # Quiz options at position 9: [null, [2, null*6, [question_count, difficulty]]]
@@ -739,19 +811,27 @@ class StudioMixin(BaseClient):
     def create_data_table(
         self,
         notebook_id: str,
-        source_ids: list[str],
-        description: str,
+        source_ids: list[str] | None = None,
+        description: str = "",
         language: str = "en",
     ) -> dict | None:
         """Create Data Table from notebook sources.
 
         Args:
             notebook_id: Notebook UUID
-            source_ids: List of source UUIDs
+            source_ids: List of source UUIDs (defaults to all sources)
             description: Description of the data table to create
             language: Language code (default: "en")
         """
         client = self._get_client()
+
+        # Default to all sources if not specified
+        if source_ids is None:
+            source_ids = self._get_all_source_ids(notebook_id)
+
+        if not source_ids:
+            raise ValueError(f"No sources found in notebook {notebook_id}. Add sources before creating studio content.")
+
         sources_nested = [[[sid]] for sid in source_ids]
 
         # Data Table options at position 18: [null, [description, language]]
@@ -793,20 +873,41 @@ class StudioMixin(BaseClient):
 
     def generate_mind_map(
         self,
-        source_ids: list[str],
+        notebook_id: str,
+        source_ids: list[str] | None = None,
     ) -> dict | None:
         """Generate a Mind Map JSON from sources.
 
         This is step 1 of 2 for creating a mind map. After generation,
         use save_mind_map() to save it to a notebook.
 
+        BREAKING CHANGE (v0.2.3+):
+            The signature changed from generate_mind_map(source_ids) to
+            generate_mind_map(notebook_id, source_ids=None).
+
+            Old usage: generate_mind_map(["source1", "source2"])
+            New usage: generate_mind_map("notebook_id", ["source1", "source2"])
+
+            If source_ids is None, all sources in the notebook will be used.
+
         Args:
-            source_ids: List of source UUIDs to include
+            notebook_id: Notebook UUID (used to get sources if source_ids not provided)
+            source_ids: List of source UUIDs to include (defaults to all sources)
 
         Returns:
             Dict with mind_map_json and generation_id, or None on failure
+
+        Raises:
+            ValueError: If no sources found in notebook
         """
         client = self._get_client()
+
+        # Default to all sources if not specified
+        if source_ids is None:
+            source_ids = self._get_all_source_ids(notebook_id)
+
+        if not source_ids:
+            raise ValueError(f"No sources found in notebook {notebook_id}. Add sources before creating studio content.")
 
         # Build source IDs in the nested format: [[[id1]], [[id2]], ...]
         sources_nested = [[[sid]] for sid in source_ids]
@@ -852,7 +953,7 @@ class StudioMixin(BaseClient):
         self,
         notebook_id: str,
         mind_map_json: str,
-        source_ids: list[str],
+        source_ids: list[str] | None = None,
         title: str = "Mind Map",
     ) -> dict | None:
         """Save a generated Mind Map to a notebook.
@@ -863,13 +964,20 @@ class StudioMixin(BaseClient):
         Args:
             notebook_id: The notebook UUID
             mind_map_json: The JSON string from generate_mind_map()
-            source_ids: List of source UUIDs used to generate the map
+            source_ids: List of source UUIDs used to generate the map (defaults to all sources)
             title: Display title for the mind map
 
         Returns:
             Dict with mind_map_id and saved info, or None on failure
         """
         client = self._get_client()
+
+        # Default to all sources if not specified
+        if source_ids is None:
+            source_ids = self._get_all_source_ids(notebook_id)
+
+        if not source_ids:
+            raise ValueError(f"No sources found in notebook {notebook_id}. Add sources before creating studio content.")
 
         # Build source IDs in the simpler format: [[id1], [id2], ...]
         sources_simple = [[sid] for sid in source_ids]

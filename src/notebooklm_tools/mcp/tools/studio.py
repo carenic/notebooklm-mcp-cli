@@ -289,7 +289,10 @@ def studio_create(
 
         elif artifact_type == "mind_map":
             # Mind map requires two steps: generate then save
-            gen_result = client.generate_mind_map(source_ids=source_ids)
+            gen_result = client.generate_mind_map(
+                notebook_id=notebook_id,
+                source_ids=source_ids
+            )
             if not gen_result or not gen_result.get("mind_map_json"):
                 return {"status": "error", "error": "Failed to generate mind map"}
 
