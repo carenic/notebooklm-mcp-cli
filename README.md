@@ -10,9 +10,17 @@
 
 📺 **Watch the Demos**
 
+### MCP Demos
+
 | **General Overview** | **Claude Desktop** | **Perplexity Desktop** | **MCP Super Assistant** |
 |:---:|:---:|:---:|:---:|
 | [![General](https://img.youtube.com/vi/d-PZDQlO4m4/mqdefault.jpg)](https://www.youtube.com/watch?v=d-PZDQlO4m4) | [![Claude](https://img.youtube.com/vi/PU8JhgLPxes/mqdefault.jpg)](https://www.youtube.com/watch?v=PU8JhgLPxes) | [![Perplexity](https://img.youtube.com/vi/BCKlDNg-qxs/mqdefault.jpg)](https://www.youtube.com/watch?v=BCKlDNg-qxs) | [![MCP SuperAssistant](https://img.youtube.com/vi/7aHDbkr-l_E/mqdefault.jpg)](https://www.youtube.com/watch?v=7aHDbkr-l_E) |
+
+### CLI Demos
+
+| **CLI Overview** |
+|:---:|
+| [![CLI Overview](https://img.youtube.com/vi/XyXVuALWZkE/mqdefault.jpg)](https://www.youtube.com/watch?v=XyXVuALWZkE) |
 
 
 ## Two Ways to Use
