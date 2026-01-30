@@ -107,7 +107,7 @@ pipx install notebooklm-mcp-cli
 
 ```bash
 # Clone the repository
-git clone https://github.com/jacob-bd/notebooklm-mcp.git
+git clone https://github.com/jacob-bd/notebooklm-mcp-cli.git
 cd notebooklm-mcp
 
 # Install with uv
