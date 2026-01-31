@@ -323,13 +323,14 @@ Use `studio_status` to check progress (or rename with `action="rename"`). Use `d
 ```bash
 # Check status
 nlm studio status <nb-id>                          # List all artifacts
+nlm studio status <nb-id> --full                   # Show full details (including custom prompts)
 nlm studio status <nb-id> --json                   # JSON output
 
 # Download artifacts
-nlm download audio <nb-id> podcast.mp3
-nlm download video <nb-id> video.mp4
-nlm download report <nb-id> report.md
-nlm download quiz <nb-id> quiz.json --format json
+nlm download audio <nb-id> --output podcast.mp3
+nlm download video <nb-id> --output video.mp4
+nlm download report <nb-id> --output report.md
+nlm download quiz <nb-id> --output quiz.json --format json
 
 # Export to Google Docs/Sheets
 nlm export sheets <nb-id> <artifact-id> --title "My Data Table"
