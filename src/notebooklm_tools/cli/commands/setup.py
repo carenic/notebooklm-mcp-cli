@@ -8,6 +8,7 @@ This is different from `nlm skill` which installs skill/reference docs.
 """
 
 import json
+import os
 import platform
 import shutil
 import subprocess
@@ -118,8 +119,6 @@ def _windsurf_config_path() -> Path:
 # =============================================================================
 # Client definitions
 # =============================================================================
-
-import os
 
 CLIENT_REGISTRY = {
     "claude-code": {

@@ -5,10 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.17] - 2026-02-07
+## [0.2.17] - 2026-02-08
+
+### Added
+- **`nlm setup` command** - Automatically configure NotebookLM MCP for AI tools (Claude Code, Claude Desktop, Gemini CLI, Cursor, Windsurf). No more manual JSON editing! Thanks to **@997unix** for this contribution (PR #39)
+  - `nlm setup list` - Show configuration status for all supported clients
+  - `nlm setup add <client>` - Add MCP server config to a client
+  - `nlm setup remove <client>` - Remove MCP server config
+- **`nlm doctor` command** - Diagnose installation and configuration issues in one command. Checks authentication, Chrome profiles, and AI tool configurations. Also by **@997unix** (PR #39)
 
 ### Fixed
 - **Version check not running** - Update notifications were never shown after CLI commands because `typer.Exit` exceptions bypassed the check. Moved `print_update_notification()` to a `finally` block so it always runs.
+- **Missing import in setup.py** - Fixed `import os` placement for Windows compatibility
 
 ## [0.2.16] - 2026-02-05
 
