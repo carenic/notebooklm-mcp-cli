@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.18] - 2026-02-09
+
+### Added
+- **Claude Desktop Extension (.mcpb)** — One-click install for Claude Desktop. Download the `.mcpb` file from the release page, double-click to install. No manual config editing required.
+- **MCPB build automation** — `scripts/build_mcpb.py` reads version from `pyproject.toml`, syncs `manifest.json`, and packages the `.mcpb` file. Old builds are auto-cleaned.
+- **GitHub Actions release asset** — `.mcpb` file is automatically built and attached to GitHub Releases alongside PyPI publish.
+- **`nlm doctor` and `nlm setup` documentation** — Added to AI docs (`nlm --ai`) and skill file.
+
+### Changed
+- **Manifest uses `uvx`** — Claude Desktop extension now uses `uvx --from notebooklm-mcp-cli notebooklm-mcp` for universal PATH compatibility.
+
+### Removed
+- Cleaned up `PROJECT_RECAP.md` and `todo.md` (outdated development artifacts).
+
 ## [0.2.17] - 2026-02-08
 
 ### Added

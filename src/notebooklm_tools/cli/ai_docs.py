@@ -102,6 +102,8 @@ nlm status artifacts <notebook>
 | `nlm data-table` | Create data tables (create) |
 | `nlm share` | Manage notebook sharing (status, public, private, invite) |
 | `nlm skill` | Install AI assistant skills (install, uninstall, list, show) |
+| `nlm doctor` | Diagnose installation, auth, Chrome, and AI tool configs |
+| `nlm setup` | Configure MCP server for AI tools (add, remove, list) |
 
 ### All Verb-First Commands
 
@@ -646,6 +648,29 @@ nlm show config --json          # Display as JSON
 nlm get config <key>            # Get specific setting
 nlm set config <key> <value>    # Update setting
 ```
+
+### Diagnostics & Setup
+
+**Doctor** - Diagnose your NotebookLM MCP installation:
+```bash
+nlm doctor                      # Run all diagnostic checks
+nlm doctor --verbose            # Show additional details
+```
+
+Checks: installation, authentication, Chrome profile, AI tool configs. Shows suggestions for any issues found.
+
+**Setup** - Configure MCP server for AI tools:
+```bash
+nlm setup list                          # Show all clients and their MCP status
+nlm setup add claude-code               # Add to Claude Code (via claude mcp add)
+nlm setup add claude-desktop            # Add to Claude Desktop config file
+nlm setup add gemini                    # Add to Gemini CLI config
+nlm setup add cursor                    # Add to Cursor config
+nlm setup add windsurf                  # Add to Windsurf config
+nlm setup remove <client>               # Remove MCP from client
+```
+
+**Supported Clients:** claude-code, claude-desktop, gemini, cursor, windsurf, codex
 
 ---
 

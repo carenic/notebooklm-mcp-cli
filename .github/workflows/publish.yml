@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # Required for trusted publishing (OIDC)
+      contents: write  # Required to upload release assets
     
     steps:
       - name: Checkout repository
@@ -28,3 +29,11 @@ jobs:
       
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Build MCPB extension
+        run: python3 scripts/build_mcpb.py
+
+      - name: Upload MCPB to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: notebooklm-mcp-*.mcpb

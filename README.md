@@ -224,6 +224,7 @@ Also remove from your AI tools:
 |------|---------|
 | Claude Code | `claude mcp remove notebooklm-mcp` |
 | Gemini CLI | `gemini mcp remove notebooklm-mcp` |
+| Claude Desktop | Settings → Extensions → Remove |
 | Cursor/VS Code | Remove entry from `~/.cursor/mcp.json` or `~/.vscode/mcp.json` |
 
 ## Authentication
