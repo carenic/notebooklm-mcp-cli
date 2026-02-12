@@ -440,6 +440,7 @@ Special thanks to:
 - **saitrogen** ([@saitrogen](https://github.com/saitrogen)) for the research polling query fallback fix.
 - **VooDisss** ([@VooDisss](https://github.com/VooDisss)) for multi-browser authentication improvements.
 - **codepiano** ([@codepiano](https://github.com/codepiano)) for the configurable DevTools timeout for the auth CLI.
+- **Tony Hansmann** ([@997unix](https://github.com/997unix)) for contributing the `nlm setup` and `nlm doctor` commands.
 
 
 ## License
