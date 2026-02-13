@@ -324,7 +324,7 @@ def studio_create(
                 }
             return {"status": "error", "error": "Failed to save mind map"}
 
-        if result:
+        if result and result.get("artifact_id"):
             return {
                 "status": "success",
                 "artifact_type": artifact_type,
@@ -333,7 +333,11 @@ def studio_create(
                 "message": f"{artifact_type.replace('_', ' ').title()} generation started. Use studio_status to check progress.",
                 "notebook_url": f"https://notebooklm.google.com/notebook/{notebook_id}",
             }
-        return {"status": "error", "error": f"Failed to create {artifact_type}"}
+        return {
+            "status": "error",
+            "error": f"NotebookLM rejected {artifact_type.replace('_', ' ')} creation (no artifact returned). "
+                     f"Try again later or create from NotebookLM UI for diagnosis.",
+        }
 
     except Exception as e:
         return {"status": "error", "error": str(e)}

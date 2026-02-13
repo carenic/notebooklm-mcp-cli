@@ -217,9 +217,13 @@ def create_audio(
                     source_ids=parse_source_ids(source_ids),
                 )
         
+        if not result or not result.get("artifact_id"):
+            console.print("[red]Error:[/red] NotebookLM rejected audio creation (no artifact returned).")
+            console.print("[dim]The backend may have returned a generic error. Try again later or create from NotebookLM UI for diagnosis.[/dim]")
+            raise typer.Exit(1)
+
         console.print(f"[green]✓[/green] Audio generation started")
-        if result:
-            console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
+        console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
         console.print(f"  Format: {format}")
         console.print(f"\n[dim]Run 'nlm studio status {notebook_id}' to check progress.[/dim]")
     except NLMError as e:
@@ -269,9 +273,13 @@ def create_report(
                     source_ids=parse_source_ids(source_ids),
                 )
         
+        if not result or not result.get("artifact_id"):
+            console.print("[red]Error:[/red] NotebookLM rejected report creation (no artifact returned).")
+            console.print("[dim]The backend may have returned a generic error. Try again later or create from NotebookLM UI for diagnosis.[/dim]")
+            raise typer.Exit(1)
+
         console.print(f"[green]✓[/green] Report generation started")
-        if result:
-            console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
+        console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
         console.print(f"\n[dim]Run 'nlm studio status {notebook_id}' to check progress.[/dim]")
     except NLMError as e:
         console.print(f"[red]Error:[/red] {e.message}")
@@ -311,9 +319,13 @@ def create_quiz(
                     source_ids=parse_source_ids(source_ids),
                 )
         
+        if not result or not result.get("artifact_id"):
+            console.print("[red]Error:[/red] NotebookLM rejected quiz creation (no artifact returned).")
+            console.print("[dim]The backend may have returned a generic error. Try again later or create from NotebookLM UI for diagnosis.[/dim]")
+            raise typer.Exit(1)
+
         console.print(f"[green]✓[/green] Quiz generation started")
-        if result:
-            console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
+        console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
         console.print(f"\n[dim]Run 'nlm studio status {notebook_id}' to check progress.[/dim]")
     except NLMError as e:
         console.print(f"[red]Error:[/red] {e.message}")
@@ -359,9 +371,13 @@ def create_flashcards(
                     source_ids=parse_source_ids(source_ids),
                 )
         
+        if not result or not result.get("artifact_id"):
+            console.print("[red]Error:[/red] NotebookLM rejected flashcards creation (no artifact returned).")
+            console.print("[dim]The backend may have returned a generic error. Try again later or create from NotebookLM UI for diagnosis.[/dim]")
+            raise typer.Exit(1)
+
         console.print(f"[green]✓[/green] Flashcards generation started")
-        if result:
-            console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
+        console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
         console.print(f"\n[dim]Run 'nlm studio status {notebook_id}' to check progress.[/dim]")
     except NLMError as e:
         console.print(f"[red]Error:[/red] {e.message}")
@@ -474,9 +490,13 @@ def create_slides(
                     source_ids=parse_source_ids(source_ids),
                 )
         
+        if not result or not result.get("artifact_id"):
+            console.print("[red]Error:[/red] NotebookLM rejected slide deck creation (no artifact returned).")
+            console.print("[dim]The backend may have returned a generic error. Try again later or create from NotebookLM UI for diagnosis.[/dim]")
+            raise typer.Exit(1)
+
         console.print(f"[green]✓[/green] Slide deck generation started")
-        if result:
-            console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
+        console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
         console.print(f"\n[dim]Run 'nlm studio status {notebook_id}' to check progress.[/dim]")
     except NLMError as e:
         console.print(f"[red]Error:[/red] {e.message}")
@@ -599,9 +619,13 @@ def create_video(
                     source_ids=parse_source_ids(source_ids),
                 )
         
+        if not result or not result.get("artifact_id"):
+            console.print("[red]Error:[/red] NotebookLM rejected video creation (no artifact returned).")
+            console.print("[dim]The backend may have returned a generic error. Try again later or create from NotebookLM UI for diagnosis.[/dim]")
+            raise typer.Exit(1)
+
         console.print(f"[green]✓[/green] Video generation started")
-        if result:
-            console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
+        console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
         console.print(f"\n[dim]Run 'nlm studio status {notebook_id}' to check progress.[/dim]")
     except NLMError as e:
         console.print(f"[red]Error:[/red] {e.message}")
@@ -641,9 +665,13 @@ def create_data_table(
                     source_ids=parse_source_ids(source_ids),
                 )
         
+        if not result or not result.get("artifact_id"):
+            console.print("[red]Error:[/red] NotebookLM rejected data table creation (no artifact returned).")
+            console.print("[dim]The backend may have returned a generic error. Try again later or create from NotebookLM UI for diagnosis.[/dim]")
+            raise typer.Exit(1)
+
         console.print(f"[green]✓[/green] Data table generation started")
-        if result:
-            console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
+        console.print(f"  Artifact ID: {result.get('artifact_id', 'unknown')}")
         console.print(f"\n[dim]Run 'nlm studio status {notebook_id}' to check progress.[/dim]")
     except NLMError as e:
         console.print(f"[red]Error:[/red] {e.message}")
