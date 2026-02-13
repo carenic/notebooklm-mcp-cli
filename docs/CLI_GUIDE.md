@@ -22,6 +22,9 @@ nlm login switch <profile>        # Switch default profile
 nlm login profile list            # List all profiles with email addresses
 nlm login profile delete <name>   # Delete a profile
 nlm login profile rename <old> <new>  # Rename a profile
+
+# External CDP provider (e.g., OpenClaw-managed browser)
+nlm login --provider openclaw --cdp-url http://127.0.0.1:18800
 ```
 
 Each profile gets its own isolated Chrome session, so you can stay logged into multiple Google accounts simultaneously.

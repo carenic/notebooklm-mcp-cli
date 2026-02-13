@@ -128,6 +128,7 @@ mcp__notebooklm-mcp__save_auth_tokens(cookies="<cookie_header>")
 nlm login                           # Launch Chrome, extract cookies (primary method)
 nlm login --check                   # Validate current session
 nlm login --profile work            # Use named profile for multiple accounts
+nlm login --provider openclaw --cdp-url http://127.0.0.1:18800  # External CDP provider
 nlm login switch <profile>          # Switch the default profile
 nlm login profile list              # List all profiles with email addresses
 nlm login profile delete <name>     # Delete a profile

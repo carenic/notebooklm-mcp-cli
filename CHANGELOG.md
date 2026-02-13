@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.21] - 2026-02-13
+
+### Added
+- **OpenClaw CDP login provider** — `nlm login --provider openclaw --cdp-url <url>` allows authentication via an already-running Chrome CDP endpoint (e.g., OpenClaw-managed browser sessions) instead of launching a separate Chrome instance. Thanks to **@kmfb** for this contribution (PR #47)
+- **CLI Guide documentation for `nlm setup` and `nlm doctor`** — Added Setup and Doctor command reference sections, updated workflow example, and added tips. Cherry-picked from PR #48 by **@997unix**
+
+### Fixed
+- **Infographic create false success** — `nlm infographic create` now exits non-zero with a clear error when the backend returns `UserDisplayableError` and no artifact, instead of silently reporting success (closes #46). Thanks to **@kmfb** (PR #47)
+- **Studio status code 4 mapping** — Studio artifact status code `4` now maps to `"failed"` instead of `"unknown"`, making artifact failures visible during polling. By **@kmfb** (PR #47)
+
+### Changed
+- **CDP websocket compatibility** — WebSocket connections now use `suppress_origin=True` for compatibility with managed Chrome endpoints, with fallback for older `websocket-client` versions
+
 ## [0.2.20] - 2026-02-11
 
 ### Added

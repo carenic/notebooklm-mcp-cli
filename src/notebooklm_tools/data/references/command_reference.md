@@ -47,6 +47,8 @@ nlm login [OPTIONS]
 |--------|-------|-------------|
 | `--profile` | `-p` | Profile name for multiple accounts |
 | `--check` | | Validate current credentials without re-authenticating |
+| `--provider` | | Auth provider: `builtin` (default) or `openclaw` |
+| `--cdp-url` | | CDP endpoint URL for external provider mode (default: `http://127.0.0.1:18800`) |
 | `--legacy` | `-l` | Use browser-cookie3 fallback (not recommended) |
 | `--browser` | `-b` | Browser for legacy mode (chrome, firefox, edge) |
 | `--manual` | `-m` | Import cookies from file |

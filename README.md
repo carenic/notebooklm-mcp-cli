@@ -250,6 +250,9 @@ nlm login --profile personal
 
 # Manual mode: import cookies from a file
 nlm login --manual --file cookies.txt
+
+# External CDP provider (e.g., OpenClaw-managed browser)
+nlm login --provider openclaw --cdp-url http://127.0.0.1:18800
 ```
 
 **Profile management:**

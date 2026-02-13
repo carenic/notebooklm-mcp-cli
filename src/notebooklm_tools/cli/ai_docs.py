@@ -167,6 +167,7 @@ nlm login                              # Authenticate (opens browser)
 nlm login --profile work               # Named profile
 nlm login --manual --file <path>       # Import cookies from file
 nlm login --check                      # Only check if auth valid
+nlm login --provider openclaw --cdp-url http://127.0.0.1:18800  # External CDP provider
 
 nlm auth status                        # Check current auth
 nlm auth status --profile work         # Check specific profile
