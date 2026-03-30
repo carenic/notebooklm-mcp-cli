@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.12] - 2026-03-30
+
+### Fixed
+- **Auth recovery skips profile-based cookies (Issue #117, Bug 1)** — `_try_reload_or_headless_auth()` gated Layer 2 recovery on `auth.json` existence. If the legacy file didn't exist, valid profile-based credentials in `profiles/default/cookies.json` were completely skipped, falling straight through to headless auth (Layer 3). Now always calls `load_cached_tokens()` which checks the profile directory first, then falls back to `auth.json`. Thanks to **@olaservo** for the incredibly detailed report!
+- **`--cdp-url` ignored by builtin provider (Issue #117, Bug 2)** — `nlm login --cdp-url http://127.0.0.1:9222` was ignored when using the default builtin provider, always launching a new Chrome instead. Now, when `--cdp-url` is explicitly provided (even with the builtin provider), the CLI auto-routes to the existing-CDP extraction path, matching the user's intent to connect to an already-running browser. Thanks again to **@olaservo**!
+- **Pre-existing lint errors blocking CI** — Fixed 3 lint violations (`SIM105` in `auth.py`, `I001` in `base.py`, `F401` in `test_coerce_list.py`) that were blocking the CI pipeline for PR #118.
+
 ### Security
 - **Restrict `auth.json` file permissions (PR #116)** — Auth token cache files are now written with `chmod 600` (owner read/write only), preventing other local users or processes from reading active session cookies. Thanks to **@tody-agent** for the security audit!
 
