@@ -14,14 +14,14 @@ import json
 import logging
 from typing import TYPE_CHECKING, TypedDict
 
-logger = logging.getLogger(__name__)
-
 from notebooklm_tools.core import constants
 
 from .errors import ServiceError, ValidationError
 
 if TYPE_CHECKING:
     from notebooklm_tools.core.client import NotebookLMClient
+
+logger = logging.getLogger(__name__)
 
 # ---------- Constants ----------
 
