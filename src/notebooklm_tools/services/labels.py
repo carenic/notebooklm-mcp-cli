@@ -73,30 +73,8 @@ def auto_label(client: NotebookLMClient, notebook_id: str) -> LabelListResult:
 
 
 def list_labels(client: NotebookLMClient, notebook_id: str) -> LabelListResult:
-    """List current labels in a notebook.
-
-    Uses the same mechanism as auto_label. If no labels exist, this will
-    trigger AI auto-labeling.
-
-    Args:
-        client: Authenticated NotebookLM client
-        notebook_id: Notebook UUID
-
-    Returns:
-        LabelListResult with current labels
-
-    Raises:
-        ServiceError: If the API call fails
-    """
-    if not notebook_id or not notebook_id.strip():
-        raise ValidationError(
-            "notebook_id is required.", user_message="Notebook ID cannot be empty."
-        )
-    try:
-        labels = client.list_labels(notebook_id)
-    except Exception as e:
-        raise ServiceError(f"Failed to list labels: {e}") from e
-    return _make_list_result(notebook_id, labels)
+    """List current labels. Triggers AI auto-labeling if none exist."""
+    return auto_label(client, notebook_id)
 
 
 def create_label(
@@ -120,20 +98,21 @@ def create_label(
         ValidationError: If name is empty
         ServiceError: If creation fails
     """
-    if not name or not name.strip():
+    stripped = name.strip()
+    if not stripped:
         raise ValidationError("Label name is required.", user_message="Label name cannot be empty.")
 
     try:
-        labels = client.create_label(notebook_id, name.strip(), emoji)
+        labels = client.create_label(notebook_id, stripped, emoji)
     except Exception as e:
         raise ServiceError(f"Failed to create label: {e}") from e
 
-    new_label = next((lbl for lbl in labels if lbl["name"] == name.strip()), None)
+    new_label = next((lbl for lbl in labels if lbl["name"] == stripped), None)
     label_id = new_label["id"] if new_label else ""
 
     return {
         "label_id": label_id,
-        "message": f"Label '{name.strip()}' created." + (f" emoji: {emoji}" if emoji else ""),
+        "message": f"Label '{stripped}' created." + (f" emoji: {emoji}" if emoji else ""),
     }
 
 
